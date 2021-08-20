@@ -13,6 +13,7 @@ defmodule ExOctocat.Connection do
   plug(Tesla.Middleware.BaseUrl, "https://api.github.com")
   plug(Tesla.Middleware.Headers, [{"user-agent", "Elixir"}])
   plug(Tesla.Middleware.EncodeJson, engine: Poison)
+  plug(Tesla.Middleware.FollowRedirects)
 
   @doc """
   Configure an authless client connection
@@ -22,9 +23,18 @@ defmodule ExOctocat.Connection do
   Tesla.Env.client
   """
   @spec new(binary()) :: Tesla.Env.client()
-  def new(token) do
-    Tesla.client [
+  def new(token, opts \\ []) do
+    middleware = [
       {Tesla.Middleware.BearerAuth, token: token}
     ]
+
+    middleware =
+      if(opts |> Keyword.get(:debug, false)) do
+        [Tesla.Middleware.Logger | middleware]
+      else
+        middleware
+      end
+
+    Tesla.client(middleware)
   end
 end
