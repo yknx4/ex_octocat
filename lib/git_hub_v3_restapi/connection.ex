@@ -29,7 +29,7 @@ defmodule ExOctocat.Connection do
     ]
 
     middleware =
-      if(opts |> Keyword.get(:debug, false)) do
+      if(opts |> Keyword.get(:log, true)) do
         [Tesla.Middleware.Logger | middleware]
       else
         middleware
